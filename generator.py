@@ -41,12 +41,34 @@ def _extract_json(text: str) -> Optional[Dict[str, Any]]:
     start = text.find("{")
     end = text.rfind("}")
     if start != -1 and end != -1 and end > start:
+        candidate = text[start : end + 1]
         try:
-            data = json.loads(text[start : end + 1])
+            data = json.loads(candidate)
             if isinstance(data, dict):
                 return data
         except Exception:
             pass
+
+        # Fix model quirk where it outputs "command: <cmd>" instead of "command": "<cmd>"
+        fixed = re.sub(r'["\']command:\s*([^"\n\r}]+)["\']', r'"command": "\1"', candidate)
+        try:
+            data = json.loads(fixed)
+            if isinstance(data, dict):
+                return data
+        except Exception:
+            pass
+
+    # Regex field extraction fallback as ultimate resilience
+    cmd_match = re.search(r'["\']?command["\']?\s*:\s*["\'](.*?)["\']', text, re.IGNORECASE)
+    risk_match = re.search(r'["\']?risk["\']?\s*:\s*["\'](low|medium|high)["\']', text, re.IGNORECASE)
+    exp_match = re.search(r'["\']?explanation["\']?\s*:\s*["\'](.*?)["\']', text, re.IGNORECASE)
+
+    if cmd_match or risk_match or exp_match:
+        return {
+            "command": cmd_match.group(1) if cmd_match else None,
+            "risk": risk_match.group(1).lower() if risk_match else "low",
+            "explanation": exp_match.group(1) if exp_match else "Generated command.",
+        }
 
     return None
 
