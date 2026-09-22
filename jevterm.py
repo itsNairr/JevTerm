@@ -110,7 +110,7 @@ def print_banner() -> None:
     print(f"{C_GRAY}│{C_RESET}{pad_box_line(f'  {C_CYAN}{C_BOLD}✦ Jev Smart Terminal{C_RESET} {C_PURPLE}v1.13{C_RESET}', width)}{C_GRAY}│{C_RESET}")
     print(f"{C_GRAY}│{C_RESET}{pad_box_line(f'  {C_GRAY}Pure Decision Engine • typesafe/jev-1.13 • Windows PowerShell 5.1+{C_RESET}', width)}{C_GRAY}│{C_RESET}")
     print(f"{C_GRAY}├{'─' * width}┤{C_RESET}")
-    print(f"{C_GRAY}│{C_RESET}{pad_box_line(f'  {C_WHITE}Catalog:{C_RESET}   22,164 verified templates   {C_WHITE}Safety:{C_RESET}  Deterministic + Auditor', width)}{C_GRAY}│{C_RESET}")
+    print(f"{C_GRAY}│{C_RESET}{pad_box_line(f'  {C_WHITE}Catalog:{C_RESET}   22,181 verified templates   {C_WHITE}Safety:{C_RESET}  Deterministic + Auditor', width)}{C_GRAY}│{C_RESET}")
     print(f"{C_GRAY}│{C_RESET}{pad_box_line(f'  {C_WHITE}Commands:{C_RESET}  Type English intent         {C_WHITE}Bypass:{C_RESET}  /<cmd> or /cd <path>', width)}{C_GRAY}│{C_RESET}")
     print(f"{C_GRAY}│{C_RESET}{pad_box_line(f'  {C_WHITE}Shortcuts:{C_RESET} /history, /clear, /help    {C_WHITE}Exit:{C_RESET}    exit or Ctrl+C', width)}{C_GRAY}│{C_RESET}")
     print(f"{C_GRAY}╰{'─' * width}╯{C_RESET}")
@@ -346,6 +346,7 @@ def process_intent(intent: str, use_mock: bool = False, json_only: bool = False)
         print(f"{C_WHITE}This command modifies system state or deletes data.{C_RESET}")
         try:
             confirm = input(f"{C_RED}Type 'yes' to proceed: {C_RESET}").strip()
+            print()
             if confirm.lower() == "yes":
                 should_execute = True
             else:
@@ -357,6 +358,7 @@ def process_intent(intent: str, use_mock: bool = False, json_only: bool = False)
     elif risk == config.RISK_MEDIUM:
         try:
             confirm = input(f"\n{C_YELLOW}Press [Enter] to execute, or 'n' to cancel: {C_RESET}").strip()
+            print()
             if confirm == "" or confirm.lower() in ("y", "yes"):
                 should_execute = True
             else:

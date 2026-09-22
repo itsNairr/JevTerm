@@ -374,5 +374,45 @@
     "risk": "low",
     "ran": true,
     "exit_code": 1
+  },
+  {
+    "timestamp": "2026-09-22T18:59:16.501419+00:00",
+    "intent": "open gemini",
+    "command": "Start-Process 'https://gemini.google.com'",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T18:59:21.501285+00:00",
+    "intent": "open whatsapp",
+    "command": "Start-Process 'whatsapp:'",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T18:59:39.553288+00:00",
+    "intent": "open word",
+    "command": "Start-Process winword",
+    "risk": "medium",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T18:59:59.861123+00:00",
+    "intent": "open excel",
+    "command": "Start-Process excel",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T19:00:09.232494+00:00",
+    "intent": "open word",
+    "command": "Start-Process winword",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
   }
 ]

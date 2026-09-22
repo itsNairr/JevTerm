@@ -6,7 +6,7 @@
 [![Model: TypeSafe Jev 1.13](https://img.shields.io/badge/model-TypeSafe%20Jev%201.13-brightgreen.svg)](https://openrouter.ai/)
 [![Decisions API: OpenRouter Alpha](https://img.shields.io/badge/API-OpenRouter%20Decisions-orange.svg)](https://openrouter.ai/api/alpha/decisions)
 
-A high-performance natural-language-to-PowerShell terminal REPL designed for Windows 10/11. Built entirely on **TypeSafe Jev 1.13 decisions** (`POST https://openrouter.ai/api/alpha/decisions`) paired with an indexed **22,164-command `tldr-pages` template catalog**, a zero-model deterministic regex blocklist, and tiered execution gates.
+A high-performance natural-language-to-PowerShell terminal REPL designed for Windows 10/11. Built entirely on **TypeSafe Jev 1.13 decisions** (`POST https://openrouter.ai/api/alpha/decisions`) paired with an indexed **22,181-command `tldr-pages` template catalog**, a zero-model deterministic regex blocklist, and tiered execution gates.
 
 > **Core Philosophy**: Jev never touches the operating system directly. It decides, your code acts. Zero generative hallucinations, zero prompt drift.
 
@@ -36,7 +36,7 @@ Most AI terminal tools connect to a massive 70B+ chat model, wait 4 seconds for 
               │ Starts with '/'           │ Regular NL Intent
               ▼                           ▼
       Raw PowerShell Execution    Stage 1: Jev Command Router (choice)
-      (Bypasses AI translation)   Jev 1.13 selects from 22,164 tldr templates
+      (Bypasses AI translation)   Jev 1.13 selects from 22,181 templates
                                   Returns: {command, risk, explanation}
                                           │
                                           ▼

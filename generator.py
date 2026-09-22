@@ -39,6 +39,23 @@ SYNONYMS: Dict[str, List[str]] = {
     "packages": ["package", "packages", "winget", "upgrade", "choco"],
     "update": ["upgrade", "update", "packages"],
     "clean": ["clean", "remove", "delete", "clear"],
+    "open": ["open", "start", "launch", "run", "browse", "app"],
+    "launch": ["open", "start", "launch", "run", "app"],
+    "start": ["open", "start", "launch", "run"],
+    "word": ["word", "winword", "doc", "docx", "document"],
+    "excel": ["excel", "spreadsheet", "xls", "xlsx", "sheet"],
+    "powerpoint": ["powerpoint", "powerpnt", "presentation", "ppt", "pptx"],
+    "gemini": ["gemini", "bard", "ai"],
+    "whatsapp": ["whatsapp", "chat", "message"],
+    "browser": ["browser", "chrome", "edge", "web", "internet"],
+    "chrome": ["chrome", "browser", "web", "internet"],
+    "edge": ["edge", "msedge", "browser", "web"],
+    "calc": ["calculator", "calc", "math"],
+    "calculator": ["calculator", "calc", "math"],
+    "notepad": ["notepad", "text", "edit", "editor"],
+    "spotify": ["spotify", "music", "song", "audio"],
+    "settings": ["settings", "control", "preferences", "config"],
+    "web": ["web", "browser", "internet", "http", "https"],
 }
 
 
@@ -110,8 +127,9 @@ def find_top_candidates(intent: str, top_k: int = 15) -> List[Dict[str, Any]]:
 
 
 def _fill_dynamic_slots(template_cmd: str, intent: str) -> str:
-    """Inject specific target filenames, paths, or names from intent into command template."""
-    # Check for target files (e.g., this.py, script.ps1, data.txt)
+    """Inject specific target filenames, paths, or names from intent into command template,
+    and cleanly strip un-provided optional placeholders."""
+    # Check for target files (e.g., this.py, script.ps1, data.txt, doc.docx)
     file_match = re.search(r"\b([a-zA-Z0-9_\-\.]+\.[a-zA-Z0-9]{1,5})\b", intent)
     target_file = file_match.group(1) if file_match else None
 
@@ -133,7 +151,21 @@ def _fill_dynamic_slots(template_cmd: str, intent: str) -> str:
     elif "path\\to\\directory" in cmd and target_name:
         cmd = cmd.replace("path\\to\\directory", target_name)
 
-    return cmd
+    # Specific handling for office apps and path placeholders
+    if target_file:
+        cmd = re.sub(r"path[/\\]to[/\\]file(?:\.[a-zA-Z0-9]+)?", target_file, cmd, flags=re.IGNORECASE)
+    else:
+        # User didn't specify a file! Remove dummy placeholder arguments
+        cmd = re.sub(r"\s+path[/\\]to[/\\]file(?:\.[a-zA-Z0-9]+)?", "", cmd, flags=re.IGNORECASE)
+        cmd = re.sub(r"\s+path[/\\]to[/\\][a-zA-Z0-9_.-]+", "", cmd, flags=re.IGNORECASE)
+        cmd = re.sub(r"\s+\[(?:/n\|/t|/s\|/safemode)\]", "", cmd, flags=re.IGNORECASE)
+
+    # Windows App-Path executables need Start-Process to launch reliably if not in PATH
+    if re.match(r"^(winword|excel|powerpnt)\b", cmd.strip(), flags=re.IGNORECASE):
+        if not cmd.strip().lower().startswith("start-process"):
+            cmd = f"Start-Process {cmd.strip()}"
+
+    return cmd.strip()
 
 
 def _mock_generator(intent: str) -> Dict[str, Any]:
@@ -175,6 +207,34 @@ def _mock_generator(intent: str) -> Dict[str, Any]:
             "explanation": "Opens this.py in Visual Studio Code.",
         }
 
+    if "gemini" in intent_lower:
+        return {
+            "command": "Start-Process 'https://gemini.google.com'",
+            "risk": "low",
+            "explanation": "Open Google Gemini in default web browser",
+        }
+
+    if "whatsapp" in intent_lower:
+        return {
+            "command": "Start-Process 'whatsapp:'",
+            "risk": "low",
+            "explanation": "Open WhatsApp application or WhatsApp Web",
+        }
+
+    if "open word" in intent_lower or "launch word" in intent_lower:
+        return {
+            "command": "Start-Process winword",
+            "risk": "low",
+            "explanation": "Launch Microsoft Word application",
+        }
+
+    if "open excel" in intent_lower or "launch excel" in intent_lower:
+        return {
+            "command": "Start-Process excel",
+            "risk": "low",
+            "explanation": "Launch Microsoft Excel application",
+        }
+
     if "find large files and remove" in intent_lower or "remove the biggest" in intent_lower:
         return {
             "command": "Get-ChildItem -Recurse -File | Sort-Object Length -Descending | Select-Object -First 5 | Remove-Item -Force",
@@ -186,7 +246,7 @@ def _mock_generator(intent: str) -> Dict[str, Any]:
         return {
             "command": None,
             "risk": "high",
-            "explanation": "Root or administrative privilege elevation cannot be granted through a standard PowerShell command.",
+            "explanation": "Privilege escalation attempts are blocked by security policy.",
         }
 
     if "compress my home folder" in intent_lower or "send it somewhere" in intent_lower:
@@ -243,6 +303,24 @@ def generate_command(intent: str, use_mock: bool = False) -> Dict[str, Any]:
         Dict with keys 'command' (str or None), 'risk' ('low'|'medium'|'high'),
         and 'explanation' (str).
     """
+    # 0. Check for explicit intent to open a URL/website (e.g. "open https://example.com" or "open reddit.com")
+    # Must NOT be a download cradle or piped execution (e.g. "curl http://... | sh")
+    is_cradle = any(x in intent.lower() for x in ("| sh", "| bash", "| iex", "| powershell", "download and run", "execute"))
+    if not is_cradle and re.match(r"^\s*(?:open|browse|visit|go to)\s+", intent, re.IGNORECASE):
+        url_match = re.search(r"\bhttps?://[^\s]+", intent, re.IGNORECASE)
+        if not url_match:
+            domain_match = re.search(r"\b(?:open|browse|visit|go to)\s+([a-zA-Z0-9-]+\.(?:com|org|net|io|dev|edu|ai|app)[^\s]*)", intent, re.IGNORECASE)
+            url = f"https://{domain_match.group(1)}" if domain_match else None
+        else:
+            url = url_match.group(0)
+
+        if url:
+            return {
+                "command": f"Start-Process '{url}'",
+                "risk": config.RISK_LOW,
+                "explanation": f"Opens {url} in default web browser.",
+            }
+
     if use_mock or not config.OPENROUTER_API_KEY:
         return _mock_generator(intent)
 

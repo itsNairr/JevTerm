@@ -1,5 +1,124 @@
 [
   {
+    "id": "app_gemini",
+    "tool": "gemini",
+    "description": "Open Google Gemini in default web browser",
+    "command": "Start-Process 'https://gemini.google.com'",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_whatsapp",
+    "tool": "whatsapp",
+    "description": "Open WhatsApp application or WhatsApp Web",
+    "command": "Start-Process 'whatsapp:'",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_chatgpt",
+    "tool": "chatgpt",
+    "description": "Open ChatGPT in default web browser",
+    "command": "Start-Process 'https://chatgpt.com'",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_youtube",
+    "tool": "youtube",
+    "description": "Open YouTube in default web browser",
+    "command": "Start-Process 'https://youtube.com'",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_google",
+    "tool": "google",
+    "description": "Open Google search in default web browser",
+    "command": "Start-Process 'https://google.com'",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_github",
+    "tool": "github",
+    "description": "Open GitHub in default web browser",
+    "command": "Start-Process 'https://github.com'",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_word",
+    "tool": "word",
+    "description": "Launch Microsoft Word word processor application",
+    "command": "Start-Process winword",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_excel",
+    "tool": "excel",
+    "description": "Launch Microsoft Excel spreadsheet application",
+    "command": "Start-Process excel",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_powerpoint",
+    "tool": "powerpoint",
+    "description": "Launch Microsoft PowerPoint presentation application",
+    "command": "Start-Process powerpnt",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_calculator",
+    "tool": "calculator",
+    "description": "Open Windows Calculator",
+    "command": "Start-Process calc",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_notepad",
+    "tool": "notepad",
+    "description": "Open Windows Notepad text editor",
+    "command": "Start-Process notepad",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_spotify",
+    "tool": "spotify",
+    "description": "Open Spotify music application",
+    "command": "Start-Process 'spotify:'",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_settings",
+    "tool": "settings",
+    "description": "Open Windows Settings",
+    "command": "Start-Process 'ms-settings:'",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_chrome",
+    "tool": "chrome",
+    "description": "Open Google Chrome web browser",
+    "command": "Start-Process chrome",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_edge",
+    "tool": "edge",
+    "description": "Open Microsoft Edge web browser",
+    "command": "Start-Process msedge",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_explorer",
+    "tool": "explorer",
+    "description": "Open File Explorer in current directory",
+    "command": "Start-Process explorer .",
+    "source": "powershell-core"
+  },
+  {
+    "id": "app_terminal",
+    "tool": "terminal",
+    "description": "Open Windows Terminal",
+    "command": "Start-Process wt",
+    "source": "powershell-core"
+  },
+  {
     "id": "core_22163",
     "tool": "winget",
     "description": "Update all installed packages and applications",
