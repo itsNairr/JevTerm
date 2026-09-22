@@ -1,4 +1,4 @@
-# Jev Smart Terminal (`jevterm`)
+# Jev Smart Terminal
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![OS: Windows 10/11](https://img.shields.io/badge/OS-Windows%2010%20%2F%2011-0078D6.svg)](https://www.microsoft.com/windows)
