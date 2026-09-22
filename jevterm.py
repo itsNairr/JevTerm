@@ -143,21 +143,24 @@ def process_intent(intent: str, use_mock: bool = False, json_only: bool = False)
             "blocked_by": "safety_layer",
         }
 
-    # Stage 3: Auditor (Second opinion model call)
-    audit_result = audit_command(cmd, use_mock=use_mock)
-    if not audit_result.get("safe", False):
-        reason = audit_result.get("reason", "Flagged unsafe by auditor.")
-        print(f"{RED}{BOLD}[BLOCKED by Auditor]{RESET} {reason}")
-        print(f"{GRAY}Command:{RESET} {cmd}")
-        log_history(intent, cmd, risk, ran=False, exit_code=None)
-        return {
-            "command": cmd,
-            "risk": risk,
-            "explanation": explanation,
-            "ran": False,
-            "exit_code": None,
-            "blocked_by": "auditor",
-        }
+    # Stage 3: Auditor (Second opinion model call for medium & high risk)
+    # Low-risk operations skip the secondary call to maintain sub-second response times,
+    # with the deterministic safety blocklist as an absolute backstop.
+    if risk in (config.RISK_MEDIUM, config.RISK_HIGH):
+        audit_result = audit_command(cmd, use_mock=use_mock)
+        if not audit_result.get("safe", False):
+            reason = audit_result.get("reason", "Flagged unsafe by auditor.")
+            print(f"{RED}{BOLD}[BLOCKED by Auditor]{RESET} {reason}")
+            print(f"{GRAY}Command:{RESET} {cmd}")
+            log_history(intent, cmd, risk, ran=False, exit_code=None)
+            return {
+                "command": cmd,
+                "risk": risk,
+                "explanation": explanation,
+                "ran": False,
+                "exit_code": None,
+                "blocked_by": "auditor",
+            }
 
     # Stage 4: Risk Gate & Confirmation
     elapsed = time.perf_counter() - start_time

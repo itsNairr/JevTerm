@@ -230,5 +230,29 @@
     "risk": "low",
     "ran": true,
     "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T17:16:16.898136+00:00",
+    "intent": "show disk usage",
+    "command": "Get-PSDrive -PSProvider FileSystem | Select-Object Name, Used, Free",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T17:16:23.629714+00:00",
+    "intent": "what folder are you in",
+    "command": "Get-Location",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T17:16:31.870680+00:00",
+    "intent": "create a file called temp_check.txt",
+    "command": "New-Item -Path \"$HOME\\Desktop\\temp_check.txt\" -ItemType File",
+    "risk": "medium",
+    "ran": false,
+    "exit_code": null
   }
 ]

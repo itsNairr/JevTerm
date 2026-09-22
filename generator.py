@@ -181,6 +181,10 @@ def _mock_generator(intent: str) -> Dict[str, Any]:
     }
 
 
+# Persistent HTTP session for connection pooling and TLS reuse
+_session = requests.Session()
+
+
 def generate_command(intent: str, use_mock: bool = False) -> Dict[str, Any]:
     """Generate a PowerShell command from natural language intent.
 
@@ -210,11 +214,12 @@ def generate_command(intent: str, use_mock: bool = False) -> Dict[str, Any]:
         ],
         "response_format": {"type": "json_object"},
         "temperature": 0.0,
+        "max_tokens": 150,
     }
 
     last_error = "Failed to parse model response"
     try:
-        resp = requests.post(
+        resp = _session.post(
             config.CHAT_ENDPOINT,
             headers=headers,
             json=payload,

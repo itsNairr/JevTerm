@@ -86,6 +86,10 @@ def _mock_auditor(command: str) -> Dict[str, Any]:
     }
 
 
+# Persistent HTTP session for connection pooling and TLS reuse
+_session = requests.Session()
+
+
 def audit_command(command: str | None, use_mock: bool = False) -> Dict[str, Any]:
     """Audit a PowerShell command for safety using the secondary Jev model call.
 
@@ -129,7 +133,7 @@ def audit_command(command: str | None, use_mock: bool = False) -> Dict[str, Any]
     }
 
     try:
-        resp = requests.post(
+        resp = _session.post(
             config.DECISIONS_ENDPOINT,
             headers=headers,
             json=decisions_payload,
