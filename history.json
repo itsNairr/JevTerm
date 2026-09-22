@@ -254,5 +254,37 @@
     "risk": "medium",
     "ran": false,
     "exit_code": null
+  },
+  {
+    "timestamp": "2026-09-22T17:28:46.773552+00:00",
+    "intent": "show disk usage",
+    "command": "Get-PSDrive -PSProvider FileSystem | Select-Object Name, Used, Free",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T17:28:54.060761+00:00",
+    "intent": "what folder are you in",
+    "command": "Get-Location",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T17:31:52.601939+00:00",
+    "intent": "show disk usage",
+    "command": "Get-PSDrive -PSProvider FileSystem | Select-Object Name, Used, Free",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T17:32:11.286153+00:00",
+    "intent": "go back one folder",
+    "command": "Set-Location ..",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
   }
 ]

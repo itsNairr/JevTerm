@@ -42,17 +42,14 @@ CHAT_ENDPOINT = os.environ.get(
     "JEVTERM_CHAT_ENDPOINT", "https://openrouter.ai/api/v1/chat/completions"
 )
 
-# Generator Model: High-precision code generation model for PowerShell 5.1+ syntax
-GENERATOR_MODEL = os.environ.get(
-    "JEVTERM_GENERATOR_MODEL", "qwen/qwen-2.5-coder-32b-instruct"
-)
+# Pure Jev Pipeline: Both generator and auditor run on TypeSafe Jev 1.13 decisions API
+MODEL = "typesafe/jev-1.13"
+GENERATOR_MODEL = "typesafe/jev-1.13"
+AUDITOR_MODEL = "typesafe/jev-1.13"
+ENDPOINT = DECISIONS_ENDPOINT
 
-# Auditor Model: TypeSafe Jev 1.13 calibrated decision model on OpenRouter Alpha Decisions
-AUDITOR_MODEL = os.environ.get("JEVTERM_AUDITOR_MODEL", "typesafe/jev-1.13")
-
-# Legacy/Default alias
-MODEL = GENERATOR_MODEL
-ENDPOINT = CHAT_ENDPOINT
+# tldr + PowerShell command catalog file
+CATALOG_FILE = BASE_DIR / "catalog.json"
 
 # HTTP Request Timeout (seconds)
 REQUEST_TIMEOUT = float(os.environ.get("JEVTERM_TIMEOUT", "15.0"))
