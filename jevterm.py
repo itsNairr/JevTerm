@@ -221,12 +221,14 @@ def repl(use_mock: bool = False) -> None:
     if not config.OPENROUTER_API_KEY:
         print(f"{YELLOW}Note: OPENROUTER_API_KEY not set. Running in mock/offline mode.{RESET}")
         print(f"{YELLOW}Place your key in .env or set $env:OPENROUTER_API_KEY for live Jev calls.{RESET}")
-    print(f"Type your natural-language intent, or '!<command>' to bypass Jev.")
+    print(f"Type your natural-language intent, or '/<command>' to run raw PowerShell.")
     print(f"Type 'exit' or 'quit' to close.\n")
 
     while True:
+        cwd = os.getcwd()
         try:
-            user_input = input(f"{CYAN}{BOLD}jev> {RESET}").strip()
+            prompt_str = f"{CYAN}{BOLD}jev {GRAY}[{cwd}]{CYAN}> {RESET}"
+            user_input = input(prompt_str).strip()
         except (KeyboardInterrupt, EOFError):
             print(f"\n{GRAY}Exiting jevterm. Goodbye!{RESET}")
             break
@@ -238,12 +240,29 @@ def repl(use_mock: bool = False) -> None:
             print(f"{GRAY}Exiting jevterm. Goodbye!{RESET}")
             break
 
-        # Escape hatch: lines starting with '!' bypass Jev
-        if user_input.startswith("!"):
+        # Escape hatch: lines starting with '/' (or legacy '!') run raw in PowerShell
+        if user_input.startswith(("/", "!")):
             raw_cmd = user_input[1:].strip()
             if not raw_cmd:
-                print(f"{YELLOW}No command provided after '!'.{RESET}")
+                print(f"{YELLOW}No command provided after escape character.{RESET}")
                 continue
+
+            # Built-in cd handling so directory changes persist in the REPL
+            if raw_cmd.lower().startswith("cd ") or raw_cmd.lower() == "cd":
+                target_dir = raw_cmd[3:].strip().strip("\"'") if len(raw_cmd) > 2 else str(Path.home())
+                if not target_dir:
+                    target_dir = str(Path.home())
+                try:
+                    target_path = Path(target_dir).expanduser()
+                    os.chdir(target_path)
+                    print(f"{GRAY}Directory changed to:{RESET} {os.getcwd()}")
+                    log_history(user_input, raw_cmd, risk="raw", ran=True, exit_code=0)
+                    continue
+                except Exception as e:
+                    print(f"{RED}cd error: {e}{RESET}", file=sys.stderr)
+                    log_history(user_input, raw_cmd, risk="raw", ran=False, exit_code=1)
+                    continue
+
             print(f"{YELLOW}[Bypass] Running raw PowerShell command:{RESET} {raw_cmd}")
             print(f"{GRAY}--- Output ---{RESET}")
             code = execute_powershell(raw_cmd)

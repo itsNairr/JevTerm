@@ -100,11 +100,12 @@ python jevterm.py
 
 Inside the REPL:
 ```powershell
-jev> list all python files modified in the last day
-jev> show disk usage
-jev> create a file called notes.txt
-jev> !Get-Service | Where-Object Status -eq 'Running'   # '!' bypasses Jev
-jev> exit
+jev [C:\Users\harik\Desktop\NLPTerminal]> list all python files modified in the last day
+jev [C:\Users\harik\Desktop\NLPTerminal]> show disk usage
+jev [C:\Users\harik\Desktop\NLPTerminal]> create a file called notes.txt
+jev [C:\Users\harik\Desktop\NLPTerminal]> /Get-Service | Where-Object Status -eq 'Running'   # '/' runs raw PowerShell
+jev [C:\Users\harik\Desktop\NLPTerminal]> /cd ..                                            # change directory
+jev [C:\Users\harik\Desktop]> exit
 ```
 
 ### Single-Shot Mode

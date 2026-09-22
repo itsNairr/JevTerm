@@ -182,5 +182,53 @@
     "risk": "medium",
     "ran": true,
     "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T17:08:06.911408+00:00",
+    "intent": "/Get-Date",
+    "command": "Get-Date",
+    "risk": "raw",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T17:08:06.911408+00:00",
+    "intent": "/cd ..",
+    "command": "cd ..",
+    "risk": "raw",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T17:08:06.944432+00:00",
+    "intent": "/cd NLPTerminal",
+    "command": "cd NLPTerminal",
+    "risk": "raw",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T17:08:59.145604+00:00",
+    "intent": "/cd ..",
+    "command": "cd ..",
+    "risk": "raw",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T17:09:14.166936+00:00",
+    "intent": "what folders are here",
+    "command": "Get-ChildItem -Directory",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T17:10:42.419665+00:00",
+    "intent": "open chrome",
+    "command": "Start-Process -FilePath 'chrome.exe'",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
   }
 ]
