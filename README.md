@@ -14,16 +14,16 @@ A high-performance natural-language-to-PowerShell terminal REPL designed for Win
 
 ## The Paradigm: Decision Models vs. Generative LLMs
 
-Most AI terminal tools connect to a massive 70B+ chat model, wait 4 seconds for tokens to stream, and hope the model doesn't hallucinate an invalid flag or run a destructive wipe.
+Traditional natural-language terminal assistants rely on generative chat completions, waiting for streaming text output while risking hallucinated parameters, non-existent cmdlets, or prompt injections.
 
-`jevterm` takes a fundamentally different, engineering-first approach:
+`jevterm` takes an engineering-first, decision-centric approach:
 
-| Generative LLM Approach | `jevterm` (TypeSafe Jev Decisions) |
-|---|---|
-| **Synthesizes syntax from scratch** (prone to non-existent cmdlets and typos) | **Routes to pre-tested templates** from 22,000+ verified `tldr-pages` entries |
-| **High latency**: 3.5s – 5.0s per command | **Sub-second latency**: ~0.85s – 1.05s end-to-end |
-| **Vulnerable to prompt injection** generating raw exploit strings | **Immune to syntax injection**: Jev only picks from approved catalog IDs |
-| **Token-heavy & expensive** ($0.50–$3.00 / 1M tokens) | **Atomic decisions**: $0.042 / 1M tokens (free output tokens) |
+| Architectural Dimension | Generative Chat LLM Approach | `jevterm` (TypeSafe Jev Decisions) |
+|---|---|---|
+| **Command Generation** | Generates raw text syntax token-by-token | Routes intent to pre-tested templates from 22,181 verified entries |
+| **Execution Latency** | Dependent on multi-token generation speed | Measured sub-second execution (399.7ms median P50, 504.6ms avg) |
+| **Injection Resilience** | Vulnerable to prompt injection yielding raw executable strings | Constrained strictly to selecting approved catalog template IDs |
+| **Pricing Model** | Standard chat completion input + output token rates | Atomic decisions at $0.042 / 1M prompt tokens (output tokens free on Decisions API) |
 
 ---
 
@@ -41,7 +41,7 @@ Most AI terminal tools connect to a massive 70B+ chat model, wait 4 seconds for 
                                           │
                                           ▼
                                   Stage 2: Deterministic Safety Layer
-                                  Zero-model regex/substring blocklist (<0.1ms)
+                                  Zero-model regex/substring blocklist (<1ms, 0.70ms avg)
                                   [BLOCKED if matched]
                                           │
                                           ▼
@@ -187,16 +187,12 @@ Benchmarked live on Windows 11 running against the live `typesafe/jev-1.13` deci
 | **Fast-Path End-to-End** | Low-risk read-only commands (Router + Safety) | **315.0 ms** | **399.7 ms** | **504.6 ms** | 1,772.3 ms |
 | **Audited-Path End-to-End** | Med/High-risk commands (Router + Safety + Auditor) | 1,890.6 ms | 1,890.6 ms | **1,890.6 ms** | 1,890.6 ms |
 
-### 2. Decision Models vs. Generative LLMs
+### 2. Operational & Cost Characteristics (Measured & Official API Rates)
 
-| Benchmark Dimension | TypeSafe Jev 1.13 (`jevterm`) | Generative Chat LLM (GPT-4o / Claude 3.5 / Qwen) |
-| :--- | :---: | :---: |
-| **Average Decision Latency** | **~504 ms** (Sub-second) | 3,200 ms – 5,000 ms (Token streaming) |
-| **Token Cost (per 1M input)** | **$0.042** | $2.50 – $15.00 (60x–350x more expensive) |
-| **Output Token Cost** | **$0.00** (Free on Decisions API) | $10.00 – $75.00 / 1M output tokens |
-| **Syntax Hallucination Rate** | **0.0%** (Catalog constrained) | 12% – 28% (Invented cmdlets/invalid flags) |
-| **Adversarial Pass Rate** | **100.0%** (10/10 scenarios passed) | Highly vulnerable to prompt injection & escapes |
-| **Deterministic Guarantee** | **Absolute** (<1ms regex backstop) | None (Probabilistic generation only) |
+- **Inference Latency**: Fast-path commands resolve in **399.7 ms** (median P50) and **504.6 ms** (average) against the live OpenRouter endpoint.
+- **Inference Cost**: OpenRouter list rate for `typesafe/jev-1.13` is **$0.042 per 1M prompt tokens**, with **$0.00 output token cost** on the Decisions API. With an average prompt payload of ~240 tokens per decision, the API cost is approximately **$0.00001 per command** (~100,000 commands per $1.00).
+- **Structural Syntax Guarantee**: Because Jev selects an existing verified catalog template ID rather than generating free-form shell syntax token-by-token, syntax errors from invented cmdlets or invalid flags are eliminated by design.
+- **Deterministic Backstop**: Every command is evaluated against an unconditional regex/substring blocklist in an average of **0.70 ms** prior to execution.
 
 ### 3. Security & Safety Evaluation
 
@@ -211,8 +207,8 @@ Benchmarked live on Windows 11 running against the live `typesafe/jev-1.13` deci
 
 ## Resume Bullets
 
-- *Architected a sub-500ms natural language smart terminal for Windows 10/11 powered by TypeSafe Jev 1.13 decisions over an indexed catalog of 22,181 verified command templates.*
+- *Architected a sub-second natural language smart terminal for Windows 10/11 (399.7ms median P50 latency, 504.6ms average) powered by TypeSafe Jev 1.13 decisions over an indexed catalog of 22,181 verified command templates.*
 - *Engineered a defense-in-depth safety architecture combining atomic Jev probability scoring, an instant (<1ms) deterministic regex blocklist, and tiered confirmation gates, achieving 100% pass rates across adversarial prompt injection and destructive-command test suites.*
-- *Eliminated generative LLM hallucinations and cut inference costs by 98% ($0.042/1M tokens) by replacing token streaming with a dual-decision Fast-Path pipeline (Router choice + Auditor noul).*
-- *Created an automated benchmark harness measuring catalog retrieval, API round-trips, and deterministic safety overhead, demonstrating an average end-to-end latency of 504.6ms on real-world workloads.*
+- *Eliminated free-form syntax hallucination risks and reduced inference cost to $0.042/1M tokens (with $0.00 output tokens on OpenRouter Decisions API) by replacing generative token streaming with a dual-decision Fast-Path pipeline (Router choice + Auditor noul).*
+- *Built an automated benchmark harness measuring catalog retrieval, API round-trips, and deterministic safety overhead, demonstrating an empirical 399.7ms median and 504.6ms average end-to-end latency across 20 real-world operations.*
 
