@@ -6,7 +6,7 @@
 [![Model: TypeSafe Jev 1.13](https://img.shields.io/badge/model-TypeSafe%20Jev%201.13-brightgreen.svg)](https://openrouter.ai/)
 [![Decisions API: OpenRouter Alpha](https://img.shields.io/badge/API-OpenRouter%20Decisions-orange.svg)](https://openrouter.ai/api/alpha/decisions)
 
-A high-performance natural-language-to-PowerShell terminal REPL designed for Windows 10/11. Built entirely on **TypeSafe Jev 1.13 decisions** (`POST https://openrouter.ai/api/alpha/decisions`) paired with an indexed **22,181-command `tldr-pages` template catalog**, a zero-model deterministic regex blocklist, and tiered execution gates.
+A high-performance natural-language-to-PowerShell terminal REPL designed for Windows 10/11. Built entirely on **TypeSafe Jev 1.13 decisions** (`POST https://openrouter.ai/api/alpha/decisions`) paired with an indexed **22,195-command `tldr-pages` template catalog**, a zero-model deterministic regex blocklist, and tiered execution gates.
 
 > **Core Philosophy**: Jev never touches the operating system directly. It decides, your code acts. Zero generative hallucinations, zero prompt drift.
 
@@ -20,7 +20,7 @@ Traditional natural-language terminal assistants rely on generative chat complet
 
 | Architectural Dimension | Generative Chat LLM Approach | `jevterm` (TypeSafe Jev Decisions) |
 |---|---|---|
-| **Command Generation** | Generates raw text syntax token-by-token | Routes intent to pre-tested templates from 22,181 verified entries |
+| **Command Generation** | Generates raw text syntax token-by-token | Routes intent to pre-tested templates from 22,195 verified entries |
 | **Execution Latency** | Dependent on multi-token generation speed | Measured sub-second execution (399.7ms median P50, 504.6ms avg) |
 | **Injection Resilience** | Vulnerable to prompt injection yielding raw executable strings | Constrained strictly to selecting approved catalog template IDs |
 | **Pricing Model** | Standard chat completion input + output token rates | Atomic decisions at $0.042 / 1M prompt tokens (output tokens free on Decisions API) |
@@ -36,7 +36,7 @@ Traditional natural-language terminal assistants rely on generative chat complet
               │ Starts with '/'           │ Regular NL Intent
               ▼                           ▼
       Raw PowerShell Execution    Stage 1: Jev Command Router (choice)
-      (Bypasses AI translation)   Jev 1.13 selects from 22,181 templates
+      (Bypasses AI translation)   Jev 1.13 selects from 22,195 templates
                                   Returns: {command, risk, explanation}
                                           │
                                           ▼
@@ -68,7 +68,7 @@ Traditional natural-language terminal assistants rely on generative chat complet
 ## Key Features
 
 - **100% Pure Jev Pipeline**: Both command selection (`choice`) and safety auditing (`noul`) run natively on `typesafe/jev-1.13` via OpenRouter's Decisions API. No third-party LLMs or chat completions.
-- **22,181 Pre-Tested Command Templates**: Sourced directly from `tldr-pages` (Windows + developer CLI tools), Windows app launchers, and native PowerShell cmdlets.
+- **22,195 Pre-Tested Command Templates**: Sourced directly from `tldr-pages` (Windows + developer CLI tools), Windows app launchers, and native PowerShell cmdlets.
 - **Sub-Second Execution (~504ms Average)**: Fast in-memory candidate retrieval combined with atomic Jev decisions and persistent HTTP keep-alive connection pooling.
 - **Deterministic Backstop (`safety.py`)**: Instant regex/substring blocklist that unconditionally vetoes drive wipes, format commands, remote code execution cradles, and registry attacks regardless of model output (<1ms).
 - **Modern Aesthetic Terminal UI**: TrueColor styling, rounded unicode preview cards, two-line prompt with path shortening (`~\Desktop`), and framed execution output streaming with exit pills.
@@ -88,12 +88,12 @@ NLPTerminal/
 ├── safety.py           # Deterministic zero-model regex blocklist (<1ms)
 ├── prompts.py          # Jev decision criteria and schemas
 ├── config.py           # Endpoint, model IDs, catalog path, and key loading
-├── catalog.json        # 22,181 verified command templates extracted from tldr-pages + Windows cmdlets
-├── history.json        # Append-only execution audit log
+├── catalog.json        # 22,195 verified command templates extracted from tldr-pages + Windows cmdlets
+├── history.json        # Append-only execution audit log (untracked)
 ├── benchmark.py        # Automated live latency, throughput, and decision benchmarking suite
 ├── README.md           # Documentation, safety model, and latency specs
 ├── .env / .env.example # API key configuration (protected by .gitignore)
-├── .gitignore          # Ignores .env and Python cache
+├── .gitignore          # Ignores .env, history.json, benchmark_results.json, and Python cache
 └── tests/              # Unit and adversarial test suites
     ├── test_safety.py
     └── test_adversarial.py

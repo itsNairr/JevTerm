@@ -6,6 +6,7 @@ Zero LLM / zero Qwen: runs 100% on Jev decisions via OpenRouter.
 """
 
 import json
+import os
 import re
 from pathlib import Path
 from typing import Dict, Any, List, Optional
@@ -58,6 +59,13 @@ SYNONYMS: Dict[str, List[str]] = {
     "spotify": ["spotify", "music", "song", "audio"],
     "settings": ["settings", "control", "preferences", "config"],
     "web": ["web", "browser", "internet", "http", "https"],
+    "python": ["python", "py", "python3", "python.exe", "version"],
+    "pip": ["pip", "pip3", "package", "packages", "wheel", "install"],
+    "venv": ["venv", "virtualenv", "environment", "env"],
+    "virtualenv": ["venv", "virtualenv", "environment", "env"],
+    "env": ["env", "environment", "variable", "variables", "var"],
+    "variable": ["env", "environment", "variable", "variables", "var"],
+    "version": ["version", "ver", "v", "--version", "-v", "python"],
 }
 
 
@@ -152,6 +160,52 @@ def _fill_dynamic_slots(template_cmd: str, intent: str) -> str:
         cmd = f"code .\\{target_file}"
     elif "path\\to\\directory" in cmd and target_name:
         cmd = cmd.replace("path\\to\\directory", target_name)
+
+    # Python script target replacement
+    if "script.py" in cmd and target_file:
+        cmd = cmd.replace("script.py", target_file)
+
+    # Package name replacement for pip commands (pip install, pip show, pip uninstall)
+    if "package" in cmd:
+        pkg_match = re.search(
+            r"\b(?:pip\s+(?:install|uninstall|show)|install|uninstall|show)\s+([a-zA-Z0-9_\-\.]+)",
+            intent,
+            re.IGNORECASE,
+        )
+        if pkg_match:
+            pkg_name = pkg_match.group(1)
+            if pkg_name.lower() not in ("package", "packages", "a", "the", "using", "with", "pip", "python", "-r", "--requirement"):
+                cmd = cmd.replace("package", pkg_name)
+
+    # Virtual environment activation normalization for Windows PowerShell
+    if "activate" in cmd.lower() and ("venv" in cmd.lower() or "virtualenv" in cmd.lower() or "pyenv" in cmd.lower() or "scripts" in cmd.lower()):
+        venv_name = target_name or ("venv" if not os.path.isdir(".venv") else ".venv")
+        cmd = f".\\{venv_name}\\Scripts\\Activate.ps1"
+    elif "python -m venv" in cmd and target_name and target_name.lower() != "venv":
+        cmd = f"python -m venv {target_name}"
+
+    # Environment variable extraction
+    if "VAR_NAME" in cmd or cmd.strip().lower() == "set name=value" or re.match(r"^set\s+[a-zA-Z0-9_]+=", cmd, flags=re.IGNORECASE):
+        set_match = re.search(
+            r"(?:set\s+)?(?:env\s+var|environment\s+variable|env|variable)?\s*([a-zA-Z0-9_]+)\s*(?:to|=)\s*['\"]?([^'\"]+?)['\"]?\s*$",
+            intent,
+            re.IGNORECASE,
+        )
+        if set_match:
+            v_name = set_match.group(1).upper()
+            v_val = set_match.group(2).strip()
+            cmd = f"$env:{v_name} = '{v_val}'"
+        elif "VAR_NAME" in cmd:
+            cmd = cmd.replace("VAR_NAME", "MY_VAR").replace("value", "my_value")
+
+    if "$env:PATH" in cmd:
+        var_match = re.search(
+            r"\b(?:env\s+var|environment\s+variable|env|variable)\s+([a-zA-Z0-9_]+)",
+            intent,
+            re.IGNORECASE,
+        )
+        if var_match and var_match.group(1).lower() not in ("variable", "var", "variables"):
+            cmd = f"$env:{var_match.group(1).upper()}"
 
     # Specific handling for office apps and path placeholders
     if target_file:

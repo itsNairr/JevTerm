@@ -1,5 +1,103 @@
 [
   {
+    "id": "py_version",
+    "tool": "python",
+    "description": "Display the currently installed Python version",
+    "command": "python --version",
+    "source": "powershell-core"
+  },
+  {
+    "id": "py_run_script",
+    "tool": "python",
+    "description": "Execute a Python script file in the current directory",
+    "command": "python script.py",
+    "source": "powershell-core"
+  },
+  {
+    "id": "py_venv_create",
+    "tool": "venv",
+    "description": "Create a new Python virtual environment in the current directory",
+    "command": "python -m venv venv",
+    "source": "powershell-core"
+  },
+  {
+    "id": "py_venv_activate",
+    "tool": "venv",
+    "description": "Activate the Python virtual environment in PowerShell",
+    "command": ".\\venv\\Scripts\\Activate.ps1",
+    "source": "powershell-core"
+  },
+  {
+    "id": "py_pip_install",
+    "tool": "pip",
+    "description": "Install a Python package using pip",
+    "command": "pip install package",
+    "source": "powershell-core"
+  },
+  {
+    "id": "py_pip_install_reqs",
+    "tool": "pip",
+    "description": "Install Python package dependencies from requirements.txt",
+    "command": "pip install -r requirements.txt",
+    "source": "powershell-core"
+  },
+  {
+    "id": "py_pip_list",
+    "tool": "pip",
+    "description": "List all installed Python packages and their versions",
+    "command": "pip list",
+    "source": "powershell-core"
+  },
+  {
+    "id": "py_pip_freeze",
+    "tool": "pip",
+    "description": "Output installed Python packages in requirements.txt format",
+    "command": "pip freeze",
+    "source": "powershell-core"
+  },
+  {
+    "id": "py_pip_show",
+    "tool": "pip",
+    "description": "Show detailed metadata and location for an installed Python package",
+    "command": "pip show package",
+    "source": "powershell-core"
+  },
+  {
+    "id": "py_pip_uninstall",
+    "tool": "pip",
+    "description": "Uninstall a specific Python package",
+    "command": "pip uninstall -y package",
+    "source": "powershell-core"
+  },
+  {
+    "id": "env_list_all",
+    "tool": "env",
+    "description": "List all environment variables and their values in current session",
+    "command": "Get-ChildItem Env:",
+    "source": "powershell-core"
+  },
+  {
+    "id": "env_get_var",
+    "tool": "env",
+    "description": "Display the value of a specific environment variable",
+    "command": "$env:PATH",
+    "source": "powershell-core"
+  },
+  {
+    "id": "env_set_session",
+    "tool": "env",
+    "description": "Set an environment variable for the current PowerShell session",
+    "command": "$env:VAR_NAME = 'value'",
+    "source": "powershell-core"
+  },
+  {
+    "id": "env_set_user_persist",
+    "tool": "env",
+    "description": "Set and persist an environment variable permanently for the current user",
+    "command": "[System.Environment]::SetEnvironmentVariable('VAR_NAME', 'value', 'User')",
+    "source": "powershell-core"
+  },
+  {
     "id": "app_gemini",
     "tool": "gemini",
     "description": "Open Google Gemini in default web browser",
