@@ -286,5 +286,93 @@
     "risk": "low",
     "ran": true,
     "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T18:52:07.795282+00:00",
+    "intent": "show disk space",
+    "command": "Get-PSDrive -PSProvider FileSystem | Select-Object Name, Used, Free",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T18:52:12.297363+00:00",
+    "intent": "list top 5 largest files in this directory",
+    "command": null,
+    "risk": "low",
+    "ran": false,
+    "exit_code": null
+  },
+  {
+    "timestamp": "2026-09-22T18:52:17.446814+00:00",
+    "intent": "find files",
+    "command": "forfiles",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T18:52:21.279817+00:00",
+    "intent": "delete everything on C drive",
+    "command": null,
+    "risk": "high",
+    "ran": false,
+    "exit_code": null
+  },
+  {
+    "timestamp": "2026-09-22T18:52:41.474368+00:00",
+    "intent": "format C: drive",
+    "command": "Write-Output 'format C: drive'",
+    "risk": "low",
+    "ran": false,
+    "exit_code": null
+  },
+  {
+    "timestamp": "2026-09-22T18:52:56.454754+00:00",
+    "intent": "/Get-Date",
+    "command": "Get-Date",
+    "risk": "raw",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T18:53:00.864199+00:00",
+    "intent": "/Get-Date",
+    "command": "Get-Date",
+    "risk": "raw",
+    "ran": true,
+    "exit_code": 0
+  },
+  {
+    "timestamp": "2026-09-22T18:55:11.815523+00:00",
+    "intent": "open gemini",
+    "command": null,
+    "risk": "low",
+    "ran": false,
+    "exit_code": null
+  },
+  {
+    "timestamp": "2026-09-22T18:55:30.471890+00:00",
+    "intent": "open whatsapp",
+    "command": null,
+    "risk": "low",
+    "ran": false,
+    "exit_code": null
+  },
+  {
+    "timestamp": "2026-09-22T18:55:52.624758+00:00",
+    "intent": "open word",
+    "command": "winword path\\to\\file.docx",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 1
+  },
+  {
+    "timestamp": "2026-09-22T18:56:05.803028+00:00",
+    "intent": "open excel",
+    "command": "excel path\\to\\file.xlsx",
+    "risk": "low",
+    "ran": true,
+    "exit_code": 1
   }
 ]
