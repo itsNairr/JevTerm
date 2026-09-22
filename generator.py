@@ -36,6 +36,8 @@ SYNONYMS: Dict[str, List[str]] = {
     "ip": ["ip", "network", "interface", "address"],
     "network": ["network", "ip", "adapter", "interface", "ping"],
     "code": ["code", "vscode", "editor", "visual studio code"],
+    "vscode": ["code", "vscode", "editor", "visual studio code"],
+    "editor": ["code", "vscode", "editor"],
     "packages": ["package", "packages", "winget", "upgrade", "choco"],
     "update": ["upgrade", "update", "packages"],
     "clean": ["clean", "remove", "delete", "clear"],
@@ -335,7 +337,7 @@ def generate_command(intent: str, use_mock: bool = False) -> Dict[str, Any]:
 
     # 2. Build Jev decisions payload
     criteria = {c["id"]: c["description"] for c in candidates}
-    criteria["unsupported"] = "None of the above commands matches or fulfills the user intent"
+    criteria["unsupported"] = "None of the above commands safely fulfills the entire user intent (e.g. data exfiltration, remote sending, or unavailable action)"
 
     payload = {
         "model": config.GENERATOR_MODEL,
@@ -343,7 +345,7 @@ def generate_command(intent: str, use_mock: bool = False) -> Dict[str, Any]:
         "questions": {
             "picked": {
                 "type": "choice",
-                "instructions": "Which command template best fulfills the user natural language intent?",
+                "instructions": "Which command template best fulfills the user natural language intent? Choose unsupported if the user intent asks for remote exfiltration, sending data externally, or actions not supported by the template.",
                 "criteria": criteria,
             },
             "risk": {
