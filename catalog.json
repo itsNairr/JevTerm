@@ -155363,5 +155363,75 @@
     "description": "List the contents of the previous directory you were in",
     "command": "ls ~-",
     "source": "tldr-common"
+  },
+  {
+    "id": "uia_get_open_windows",
+    "tool": "Get-OpenWindows",
+    "description": "List visible top-level windows on screen with names, process IDs, and bounding boxes",
+    "command": "Get-OpenWindows",
+    "source": "powershell-uia"
+  },
+  {
+    "id": "uia_start_app",
+    "tool": "Start-App",
+    "description": "Launch a Windows application by name or executable",
+    "command": "Start-App -Name app_name",
+    "source": "powershell-uia"
+  },
+  {
+    "id": "uia_click_at",
+    "tool": "Click-At",
+    "description": "Click at specific screen coordinates X and Y using SendInput",
+    "command": "Click-At -X 500 -Y 300",
+    "source": "powershell-uia"
+  },
+  {
+    "id": "uia_click_element",
+    "tool": "Click-Element",
+    "description": "Find and click a named UI element or button in the active window UIAutomation tree",
+    "command": "Click-Element -Name \"element_name\"",
+    "source": "powershell-uia"
+  },
+  {
+    "id": "uia_type_text",
+    "tool": "Type-Text",
+    "description": "Type text into the currently focused window or element using SendKeys",
+    "command": "Type-Text -Text \"sample_text\"",
+    "source": "powershell-uia"
+  },
+  {
+    "id": "uia_press_hotkey",
+    "tool": "Press-Hotkey",
+    "description": "Press a keyboard hotkey or key combination (e.g. Enter, Ctrl+S, Alt+F4)",
+    "command": "Press-Hotkey -Keys \"keys\"",
+    "source": "powershell-uia"
+  },
+  {
+    "id": "uia_get_window_elements",
+    "tool": "Get-WindowElements",
+    "description": "List buttons, fields, and interactive elements inside a specific window",
+    "command": "Get-WindowElements -Name \"window_name\"",
+    "source": "powershell-uia"
+  },
+  {
+    "id": "uia_scroll_at",
+    "tool": "Scroll-At",
+    "description": "Scroll mouse wheel at coordinates X and Y with specified delta",
+    "command": "Scroll-At -X 500 -Y 300 -Delta -120",
+    "source": "powershell-uia"
+  },
+  {
+    "id": "uia_close_window",
+    "tool": "Close-Window",
+    "description": "Close a target application window gracefully by name",
+    "command": "Close-Window -Name \"window_name\"",
+    "source": "powershell-uia"
+  },
+  {
+    "id": "uia_focus_window",
+    "tool": "Focus-Window",
+    "description": "Bring a target application window to the foreground and focus it by name",
+    "command": "Focus-Window -Name \"window_name\"",
+    "source": "powershell-uia"
   }
 ]
