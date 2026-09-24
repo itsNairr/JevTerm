@@ -235,7 +235,7 @@ def _fill_dynamic_slots(template_cmd: str, intent: str) -> str:
 
     # UI Automation primitives slot filling
     if "app_name" in cmd:
-        app_match = re.search(r"\b(?:start|open|launch|run)\s+['\"]?([a-zA-Z0-9_\-\.]+)", intent, re.IGNORECASE)
+        app_match = re.search(r"\b(?:start|open|launch|run)\s+['\"]?([a-zA-Z0-9_\-\.\s]+?)['\"]?(?:\s+(?:and|then|\&|\|)|$)", intent, re.IGNORECASE)
         app_target = app_match.group(1).strip() if app_match else (target_name or "notepad")
         cmd = cmd.replace("app_name", app_target)
 
@@ -249,7 +249,9 @@ def _fill_dynamic_slots(template_cmd: str, intent: str) -> str:
     if "element_name" in cmd:
         elem_match = re.search(r"['\"]([^'\"]+)['\"]", intent)
         if not elem_match:
-            elem_match = re.search(r"\b(?:click|button|element|press)\s+([a-zA-Z0-9_\-\.]+)", intent, re.IGNORECASE)
+            elem_match = re.search(r"\b(?:click|press)(?:\s+(?:on|the|a|an))?\s+([a-zA-Z0-9_\-\.]+)", intent, re.IGNORECASE)
+            if elem_match and elem_match.group(1).lower() in ("the", "a", "an", "on", "button"):
+                elem_match = re.search(r"\b([a-zA-Z0-9_\-\.]+)\s+button\b", intent, re.IGNORECASE)
         elem_target = elem_match.group(1).strip() if elem_match else (target_name or "OK")
         cmd = cmd.replace("element_name", elem_target)
 
@@ -302,6 +304,15 @@ def _mock_generator(intent: str) -> Dict[str, Any]:
             "command": "Get-OpenWindows",
             "risk": "low",
             "explanation": "List all visible top-level windows on screen with names, process IDs, and bounding boxes.",
+        }
+
+    if "open notepad and type" in intent_lower:
+        text_match = re.search(r"type\s+['\"]?(.+?)['\"]?$", intent_lower)
+        text = text_match.group(1).strip() if text_match else "hello world"
+        return {
+            "command": f"Start-App -Name notepad; Start-Sleep -Milliseconds 800; Focus-Window -Name 'Notepad'; Type-Text -Text '{text}'",
+            "risk": "low",
+            "explanation": f"Launch notepad, focus window, and type '{text}'.",
         }
 
     if "delete everything" in intent_lower or "rm -rf" in intent_lower:
@@ -452,6 +463,22 @@ def generate_command(intent: str, use_mock: bool = False) -> Dict[str, Any]:
                 "risk": config.RISK_LOW,
                 "explanation": f"Opens {url} in default web browser.",
             }
+
+    # Compound UI Automation intents (e.g. "open notepad and type hello world")
+    compound_match = re.search(
+        r"^\s*(?:open|launch|start)\s+([a-zA-Z0-9_\-\.]+)\s+and\s+(?:type|enter|write)\s+['\"]?(.+?)['\"]?\s*$",
+        intent,
+        re.IGNORECASE,
+    )
+    if compound_match:
+        app = compound_match.group(1).strip().lower()
+        text = compound_match.group(2).strip()
+        safe_text = text.replace("'", "''")
+        return {
+            "command": f"Start-App -Name {app}; Start-Sleep -Milliseconds 800; Focus-Window -Name '{app}'; Type-Text -Text '{safe_text}'",
+            "risk": config.RISK_LOW,
+            "explanation": f"Launch {app}, focus window, and type '{text}'.",
+        }
 
     if use_mock or not config.OPENROUTER_API_KEY:
         return _mock_generator(intent)

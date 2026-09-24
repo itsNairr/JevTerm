@@ -80,5 +80,24 @@ class TestUIAutomationMilestone1(unittest.TestCase):
             self.assertIn("height", w["bbox"])
 
 
+class TestUIAutomationMilestone2(unittest.TestCase):
+    def test_open_notepad_and_type_generation(self):
+        res = generator.generate_command("open Notepad and type hello world", use_mock=False)
+        cmd = res.get("command", "")
+        self.assertIn("Start-App -Name notepad", cmd)
+        self.assertIn("Type-Text -Text 'hello world'", cmd)
+
+    def test_open_notepad_and_type_mock(self):
+        res = generator.generate_command("open Notepad and type hello world", use_mock=True)
+        cmd = res.get("command", "")
+        self.assertIn("Start-App -Name notepad", cmd)
+        self.assertIn("Type-Text -Text 'hello world'", cmd)
+
+    def test_click_element_not_found(self):
+        exit_code, stdout_str = execute_powershell("Click-Element -Name 'NonExistentButtonXYZ'")
+        self.assertEqual(exit_code, 0)
+        self.assertIn("I can't see that element", stdout_str)
+
+
 if __name__ == "__main__":
     unittest.main()
