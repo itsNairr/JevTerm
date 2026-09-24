@@ -200,12 +200,61 @@ def log_history(
         print(f"{C_GRAY}[Warning: Failed to write to history.json: {e}]{C_RESET}", file=sys.stderr)
 
 
-def execute_powershell(command: str) -> int:
+UIA_PRIMITIVES_PATH = config.BASE_DIR / "scripts" / "uia_primitives.ps1"
+
+
+def summarize_open_windows(output_str: str) -> str:
+    """Parse JSON list of open windows and return a clear, conversational plain-English summary."""
+    try:
+        start = output_str.find("[")
+        end = output_str.rfind("]")
+        if start == -1 or end == -1 or end <= start:
+            return "No open application windows were detected on your screen."
+
+        windows = json.loads(output_str[start : end + 1])
+        if not isinstance(windows, list) or not windows:
+            return "No open application windows were detected on your screen."
+
+        apps = []
+        for w in windows:
+            name = w.get("name", "").strip()
+            proc = w.get("process", "").strip()
+            if not name or name in ("Program Manager", "NVIDIA GeForce Overlay"):
+                continue
+            apps.append((name, proc))
+
+        if not apps:
+            return "No active application windows are currently visible on your screen."
+
+        window_descriptions = []
+        for name, proc in apps:
+            if proc and proc.lower() not in name.lower() and proc != "unknown":
+                window_descriptions.append(f"{name} ({proc})")
+            else:
+                window_descriptions.append(name)
+
+        count = len(window_descriptions)
+        if count == 1:
+            return f"You currently have 1 open window on your screen: {window_descriptions[0]}."
+        elif count == 2:
+            return f"You currently have 2 open windows on your screen: {window_descriptions[0]} and {window_descriptions[1]}."
+        else:
+            first_part = ", ".join(window_descriptions[:-1])
+            return f"You currently have {count} open windows on your screen: {first_part}, and {window_descriptions[-1]}."
+    except Exception as e:
+        return f"Unable to parse open windows summary: {e}"
+
+
+def execute_powershell(command: str) -> tuple:
     """Execute a command in PowerShell and frame its output cleanly."""
     print(f"{C_GRAY}┌── Output ──────────────────────────────────────────────────────────────────{C_RESET}")
     try:
+        # Automatically dot-source UIA primitives if available
+        script_prefix = f". '{UIA_PRIMITIVES_PATH}'; " if UIA_PRIMITIVES_PATH.is_file() else ""
+        full_command = f"{script_prefix}{command}"
+
         proc = subprocess.run(
-            [config.SHELL_EXECUTABLE] + config.SHELL_ARGS + [command],
+            [config.SHELL_EXECUTABLE] + config.SHELL_ARGS + [full_command],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -236,11 +285,11 @@ def execute_powershell(command: str) -> int:
             else f"{C_RED}✖ Failed  •  Exit {proc.returncode}{C_RESET}"
         )
         print(f"{C_GRAY}└── [{C_RESET}{status_badge}{C_GRAY}] ──────────────────────────────────────────{C_RESET}")
-        return proc.returncode
+        return proc.returncode, proc.stdout or ""
     except Exception as e:
         print(f"{C_RED}│ Execution error: {e}{C_RESET}", file=sys.stderr)
         print(f"{C_GRAY}└── [{C_RED}✖ Error{C_GRAY}] ──────────────────────────────────────────────────────────{C_RESET}")
-        return -1
+        return -1, ""
 
 
 # ============================================================================
@@ -373,8 +422,15 @@ def process_intent(intent: str, use_mock: bool = False, json_only: bool = False)
 
     exit_code = None
     if should_execute:
-        exit_code = execute_powershell(cmd)
+        exit_code, stdout_str = execute_powershell(cmd)
         print()
+
+        # Milestone 1: Plain English summary for Get-OpenWindows
+        if cmd.strip().startswith("Get-OpenWindows") and exit_code == 0:
+            summary = summarize_open_windows(stdout_str)
+            print(f"{C_GRAY}╭── {C_CYAN}{C_BOLD}✦ Jev Screen Summary{C_RESET} {C_GRAY}──────────────────────────────────────────────────────{C_RESET}")
+            print(f"{C_GRAY}│{C_RESET}  {C_WHITE}{summary}{C_RESET}")
+            print(f"{C_GRAY}╰────────────────────────────────────────────────────────────────────────────{C_RESET}\n")
 
     log_history(intent, cmd, risk, ran=should_execute, exit_code=exit_code)
     return {
@@ -453,7 +509,7 @@ def repl(use_mock: bool = False) -> None:
                     continue
 
             print(f"\n{C_PURPLE}⚡ Raw PowerShell:{C_RESET} {C_WHITE}{raw_cmd}{C_RESET}")
-            code = execute_powershell(raw_cmd)
+            code, _ = execute_powershell(raw_cmd)
             print()
             log_history(user_input, raw_cmd, risk="raw", ran=True, exit_code=code)
             continue

@@ -66,6 +66,16 @@ SYNONYMS: Dict[str, List[str]] = {
     "env": ["env", "environment", "variable", "variables", "var"],
     "variable": ["env", "environment", "variable", "variables", "var"],
     "version": ["version", "ver", "v", "--version", "-v", "python"],
+    "windows": ["windows", "window", "screen", "open", "desktop", "apps", "display"],
+    "window": ["window", "windows", "screen", "open", "desktop", "apps", "elements"],
+    "screen": ["screen", "windows", "desktop", "display", "open", "visible"],
+    "click": ["click", "button", "mouse", "press", "select", "element"],
+    "type": ["type", "text", "enter", "write", "keys", "input"],
+    "hotkey": ["hotkey", "press", "keys", "shortcut", "key", "enter"],
+    "scroll": ["scroll", "wheel", "mouse", "up", "down"],
+    "close": ["close", "exit", "quit", "kill", "terminate", "window"],
+    "focus": ["focus", "switch", "activate", "bring", "window", "foreground"],
+    "elements": ["elements", "buttons", "controls", "fields", "inspect", "window"],
 }
 
 
@@ -115,8 +125,10 @@ def find_top_candidates(intent: str, top_k: int = 15) -> List[Dict[str, Any]]:
         source = item.get("source", "")
 
         score = 0
-        # Source weighting: Windows and native PowerShell templates prioritized
-        if source == "powershell-core":
+        # Source weighting: UI Automation, Windows and native PowerShell templates prioritized
+        if source == "powershell-uia":
+            score += 25
+        elif source == "powershell-core":
             score += 15
         elif source == "tldr-windows":
             score += 6
@@ -221,12 +233,76 @@ def _fill_dynamic_slots(template_cmd: str, intent: str) -> str:
         if not cmd.strip().lower().startswith("start-process"):
             cmd = f"Start-Process {cmd.strip()}"
 
+    # UI Automation primitives slot filling
+    if "app_name" in cmd:
+        app_match = re.search(r"\b(?:start|open|launch|run)\s+['\"]?([a-zA-Z0-9_\-\.]+)", intent, re.IGNORECASE)
+        app_target = app_match.group(1).strip() if app_match else (target_name or "notepad")
+        cmd = cmd.replace("app_name", app_target)
+
+    if "window_name" in cmd:
+        win_match = re.search(r"['\"]([^'\"]+)['\"]", intent)
+        if not win_match:
+            win_match = re.search(r"\b(?:window|in|inside|of|close|focus|elements\s+in)\s+([a-zA-Z0-9_\-\.]+)", intent, re.IGNORECASE)
+        win_target = win_match.group(1).strip() if win_match else (target_name or "Notepad")
+        cmd = cmd.replace("window_name", win_target)
+
+    if "element_name" in cmd:
+        elem_match = re.search(r"['\"]([^'\"]+)['\"]", intent)
+        if not elem_match:
+            elem_match = re.search(r"\b(?:click|button|element|press)\s+([a-zA-Z0-9_\-\.]+)", intent, re.IGNORECASE)
+        elem_target = elem_match.group(1).strip() if elem_match else (target_name or "OK")
+        cmd = cmd.replace("element_name", elem_target)
+
+    if "sample_text" in cmd:
+        text_match = re.search(r"['\"]([^'\"]+)['\"]", intent)
+        if not text_match:
+            text_match = re.search(r"\b(?:type|enter|write|input)\s+(.+)$", intent, re.IGNORECASE)
+        text_target = text_match.group(1).strip() if text_match else "hello world"
+        cmd = cmd.replace("sample_text", text_target)
+
+    if '"keys"' in cmd or "keys" in cmd:
+        key_match = re.search(r"['\"]([^'\"]+)['\"]", intent)
+        if not key_match:
+            if re.search(r"\benter\b", intent, re.IGNORECASE):
+                key_target = "{ENTER}"
+            elif re.search(r"\bescape|esc\b", intent, re.IGNORECASE):
+                key_target = "{ESC}"
+            elif re.search(r"\btab\b", intent, re.IGNORECASE):
+                key_target = "{TAB}"
+            elif re.search(r"\bctrl\s*\+\s*s\b", intent, re.IGNORECASE):
+                key_target = "^s"
+            elif re.search(r"\balt\s*\+\s*f4\b", intent, re.IGNORECASE):
+                key_target = "%{F4}"
+            else:
+                key_match = re.search(r"\b(?:press|hotkey|keys?)\s+([a-zA-Z0-9_\+\-\{\}\^%~]+)", intent, re.IGNORECASE)
+                key_target = key_match.group(1).strip() if key_match else "{ENTER}"
+        else:
+            key_target = key_match.group(1).strip()
+        cmd = cmd.replace("keys", key_target)
+
+    if "Click-At -X 500 -Y 300" in cmd:
+        coord_nums = re.findall(r"\b(\d+)\b", intent)
+        if len(coord_nums) >= 2:
+            cmd = f"Click-At -X {coord_nums[0]} -Y {coord_nums[1]}"
+
+    if "Scroll-At -X 500 -Y 300 -Delta -120" in cmd:
+        coord_nums = re.findall(r"\b(\d+)\b", intent)
+        if len(coord_nums) >= 2:
+            cmd = f"Scroll-At -X {coord_nums[0]} -Y {coord_nums[1]} -Delta -120"
+
     return cmd.strip()
 
 
 def _mock_generator(intent: str) -> Dict[str, Any]:
     """Offline mock generator for testing when API key is not present."""
     intent_lower = intent.lower().strip()
+
+    if any(q in intent_lower for q in ("what windows are open", "what's on my screen", "whats on my screen", "what's open", "whats open", "what is on my screen", "what is open", "list windows")):
+        return {
+            "command": "Get-OpenWindows",
+            "risk": "low",
+            "explanation": "List all visible top-level windows on screen with names, process IDs, and bounding boxes.",
+        }
 
     if "delete everything" in intent_lower or "rm -rf" in intent_lower:
         return {
